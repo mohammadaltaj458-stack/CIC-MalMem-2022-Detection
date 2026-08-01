@@ -1,51 +1,71 @@
-# Obfuscated Malware Detection (CIC-MalMem-2022)
+# Obfuscated Malware Detection using Machine Learning
 
-A machine learning project for detecting obfuscated malware in memory dumps using the CIC-MalMem-2022 dataset. It evaluates Logistic Regression, Random Forest, and XGBoost models on memory forensic features.
+This project explores the use of machine learning techniques for detecting obfuscated malware using memory-based features from the CIC-MalMem-2022 dataset.
 
-## Dataset & Leakage Considerations
+The goal of this project was to build and compare different machine learning models and understand how well they can classify benign and malicious memory samples.
 
-* **Source:** CIC-MalMem-2022 dataset.
-* **Instances:** 58,062 clean samples (after strict deduplication to prevent data leakage).
-* **Features:** 55 numerical memory forensic indicators.
-* **Class Distribution:** Balanced binary classification (0: Benign, 1: Malware).
+## Dataset
 
-> **Data Leakage Mitigation:** To ensure realistic generalization, duplicates were stripped, stratified 80/20 train/test splitting was executed prior to any scaling, and `StandardScaler` was fitted strictly on the training set.
+Dataset: CIC-MalMem-2022
 
-## Repository Layout
+- Samples: 58,062 instances after removing duplicate records
+- Features: 55 numerical memory-related features
+- Task: Binary classification
+    - 0: Benign
+    - 1: Malware
 
-* `notebook.ipynb`: End-to-end execution pipeline (Data preprocessing, model training, evaluation, and visualizations).
-* `src/preprocess.py`: Modular preprocessing and feature scaling logic.
-* `models/best_model.pkl`: Serialized XGBoost model artifact.
-* `results/`: Performance metrics CSV, ROC curves, and confusion matrices.
-* `requirements.txt`: Python package dependencies.
+## Approach
 
-## Benchmarks & Evaluation
+The project follows a simple machine learning pipeline:
 
-Evaluated on an independent $20\%$ hold-out test set ($11,613$ samples):
+1. Data cleaning and preprocessing
+2. Removing duplicate samples
+3. Splitting data into training and testing sets
+4. Feature scaling using StandardScaler
+5. Training and comparing different models:
 
-| Model | Accuracy | Precision | Recall | F1-Score | ROC-AUC | False Negatives |
-| :--- | :---: | :---: | :---: | :---: | :---: | :---: |
-| Logistic Regression | 0.9991 | 0.9997 | 0.9986 | 0.9991 | 0.9999 | 8 |
-| Random Forest | 1.0000 | 1.0000 | 1.0000 | 1.0000 | 1.0000 | 0 |
-| XGBoost | 1.0000 | 1.0000 | 1.0000 | 1.0000 | 1.0000 | 0 |
+- Logistic Regression
+- Random Forest
+- XGBoost
 
-*Full Confusion Matrices and ROC Curves are stored under `results/`.*
+## Results
 
-## Forensic Insight: `svcscan.nservices`
+Models were evaluated using:
 
-Feature importance analysis identified `svcscan.nservices` as the primary classification signal (contributing $>97\%$ weight in XGBoost). 
+- Accuracy
+- Precision
+- Recall
+- F1-score
+- ROC-AUC
 
-**Security Interpretation:** Modern obfuscated malware injects malicious code into background system services or creates rogue services to maintain persistence and bypass standard process monitors. A high anomaly in service counts relative to standard execution profiles serves as a definitive behavioral artifact in memory dumps.
+| Model | Accuracy | Precision | Recall | F1-score |
+|------|----------|-----------|--------|----------|
+| Logistic Regression | 0.9991 | 0.9997 | 0.9986 | 0.9991 |
+| Random Forest | 1.0000 | 1.0000 | 1.0000 | 1.0000 |
+| XGBoost | 1.0000 | 1.0000 | 1.0000 | 1.0000 |
 
-## Future Work
+## Observations
 
-* **Explainable AI (XAI):** Integrating SHAP (SHapley Additive exPlanations) to provide local interpretability for security analysts per memory sample.
-* **Adversarial Robustness:** Testing tree ensembles against feature perturbation techniques designed to mimic benign service signatures.
+The tree-based models achieved very high performance on this dataset.
 
-## Usage
+Feature importance analysis showed that `svcscan.nservices` was one of the most influential features for XGBoost classification.
 
-1. Install dependencies:
-   `pip install -r requirements.txt`
+This suggests that service-related memory features may contain useful information for distinguishing between benign and malicious samples.
 
-2. Run the experiment:
-   Execute `notebook.ipynb`
+## Future Improvements
+
+Possible future extensions include:
+
+- Using SHAP to better understand model decisions.
+- Testing model robustness under modified input features.
+- Exploring deep learning approaches for malware detection.
+
+## How to Run
+
+Install dependencies:
+
+pip install -r requirements.txt
+
+Run:
+
+Open and execute `notebook.ipynb`
